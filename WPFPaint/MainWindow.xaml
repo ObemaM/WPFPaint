@@ -1,0 +1,150 @@
+<Fluent:RibbonWindow x:Class="WPFPaint.MainWindow"
+                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                     xmlns:local="clr-namespace:WPFPaint"
+                     xmlns:Fluent="urn:fluent-ribbon"
+                     xmlns:avalonDock="https://github.com/Dirkster99/AvalonDock"
+                     mc:Ignorable="d"
+                     Title="WPF Paint — Графический редактор" Height="700" Width="1050"
+                     WindowStartupLocation="CenterScreen"
+                     Closing="Window_Closing">
+    
+    <Window.InputBindings>
+        <KeyBinding Key="N" Modifiers="Ctrl" Command="{x:Static local:MainWindow.NewCommand}"/>
+        <KeyBinding Key="O" Modifiers="Ctrl" Command="{x:Static local:MainWindow.OpenCommand}"/>
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{x:Static local:MainWindow.SaveCommand}"/>
+        <KeyBinding Key="S" Modifiers="Ctrl+Shift" Command="{x:Static local:MainWindow.SaveAsCommand}"/>
+        <KeyBinding Key="Z" Modifiers="Ctrl" Command="{x:Static local:MainWindow.ResizeCanvasCommand}"/>
+    </Window.InputBindings>
+
+    <DockPanel>
+        <Fluent:Ribbon DockPanel.Dock="Top" IsMinimized="False">
+            
+            <!-- Простое меню Файл -->
+            <Fluent:Ribbon.Menu>
+                <Fluent:ApplicationMenu Header="Файл">
+                    <Fluent:MenuItem Header="Создать" Click="NewFile_Click" KeyTip="N"/>
+                    <Fluent:MenuItem Header="Открыть..." Click="OpenFile_Click" KeyTip="O"/>
+                    <Fluent:MenuItem Header="Сохранить" Click="SaveFile_Click" KeyTip="S" IsEnabled="{Binding ElementName=BtnSave, Path=IsEnabled}"/>
+                    <Fluent:MenuItem Header="Сохранить как..." Click="SaveFileAs_Click" KeyTip="A" IsEnabled="{Binding ElementName=BtnSave, Path=IsEnabled}"/>
+                    <Fluent:MenuItem Header="О программе" Click="About_Click" KeyTip="I"/>
+                    <Fluent:MenuItem Header="Выход" Click="Exit_Click" KeyTip="X"/>
+                </Fluent:ApplicationMenu>
+            </Fluent:Ribbon.Menu>
+
+            <!-- Вкладка Главная -->
+            <Fluent:RibbonTabItem Header="Главная">
+                <!-- Группа Файл -->
+                <Fluent:RibbonGroupBox Header="Файл">
+                    <Fluent:Button Header="📄 Создать" SizeDefinition="Large" Click="NewFile_Click" ToolTip="Создать новый документ (Ctrl+N)"/>
+                    <Fluent:Button Header="📂 Открыть" SizeDefinition="Large" Click="OpenFile_Click" ToolTip="Открыть файл (Ctrl+O)"/>
+                    <Fluent:Button x:Name="BtnSave" Header="💾 Сохранить" SizeDefinition="Large" IsEnabled="False" Click="SaveFile_Click" ToolTip="Сохранить файл (Ctrl+S)"/>
+                </Fluent:RibbonGroupBox>
+            </Fluent:RibbonTabItem>
+
+            <!-- Вкладка Инструменты -->
+            <Fluent:RibbonTabItem Header="Инструменты">
+                <Fluent:RibbonGroupBox Header="Выбор инструмента">
+                    <Fluent:RadioButton x:Name="BtnPen" Header="✏️ Перо" SizeDefinition="Large" GroupName="DrawTools" IsEnabled="False" Click="ToolPen_Click" ToolTip="Перо (P)" IsChecked="True"/>
+                    <Fluent:RadioButton x:Name="BtnLine" Header="╱ Линия" SizeDefinition="Large" GroupName="DrawTools" IsEnabled="False" Click="ToolLine_Click" ToolTip="Линия (L)"/>
+                    <Fluent:RadioButton x:Name="BtnEllipse" Header="⭕ Эллипс" SizeDefinition="Large" GroupName="DrawTools" IsEnabled="False" Click="ToolEllipse_Click" ToolTip="Эллипс (E)"/>
+                    <Fluent:RadioButton x:Name="BtnEraser" Header="🧹 Ластик" SizeDefinition="Large" GroupName="DrawTools" IsEnabled="False" Click="ToolEraser_Click" ToolTip="Ластик (R)"/>
+                    <Fluent:RadioButton x:Name="BtnText" Header="🔤 Текст" SizeDefinition="Large" GroupName="DrawTools" IsEnabled="False" Click="ToolText_Click" ToolTip="Текст (T)"/>
+                    <Fluent:RadioButton x:Name="BtnBucket" Header="▧ Заливка" SizeDefinition="Large" GroupName="DrawTools" IsEnabled="False" Click="ToolBucket_Click" ToolTip="Заливка (B)"/>
+                    <Fluent:RadioButton x:Name="BtnCallout" Header="💬 Выноска" SizeDefinition="Large" GroupName="DrawTools" IsEnabled="False" Click="ToolCallout_Click" ToolTip="Выноска (C)"/>
+                </Fluent:RibbonGroupBox>
+
+                <!-- Группа Параметры рисования -->
+                <Fluent:RibbonGroupBox Header="Параметры рисования">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,2,10,2" Width="100">
+                        <TextBlock Text="Цвет:" VerticalAlignment="Center" Margin="0,0,4,0" Width="50" Height="16"/>
+                        <Border x:Name="StrokeColorBorder" Width="28" Height="28" BorderBrush="Gray" BorderThickness="1"
+                                Background="Black" Cursor="Hand" ToolTip="Цвет пера (щёлкните для выбора)"
+                                MouseLeftButtonUp="StrokeColor_Click" CornerRadius="3"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,2">
+                        <TextBlock Text="Заливка:" VerticalAlignment="Center" Margin="0,0,4,0" Width="50" Height="16"/>
+                        <Border x:Name="FillColorBorder" Width="28" Height="28" BorderBrush="Gray" BorderThickness="1"
+                                Background="Yellow" Cursor="Hand" ToolTip="Цвет заливки (щёлкните для выбора)"
+                                MouseLeftButtonUp="FillColor_Click" CornerRadius="3"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,2">
+                        <TextBlock Text="Толщина:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <ComboBox x:Name="ThicknessCombo" Width="55" SelectedIndex="1" ToolTip="Толщина пера"
+                                  SelectionChanged="ThicknessCombo_Changed">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="5"/>
+                            <ComboBoxItem Content="8"/>
+                            <ComboBoxItem Content="10"/>
+                            <ComboBoxItem Content="15"/>
+                            <ComboBoxItem Content="20"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <Fluent:CheckBox x:Name="FilledCheckBox" Header="Заливка фигур" Margin="10,0,0,0" VerticalAlignment="Center"
+                                     ToolTip="Рисовать закрашенные фигуры"
+                                     Checked="FilledCheck_Changed" Unchecked="FilledCheck_Changed"/>
+                </Fluent:RibbonGroupBox>
+
+                <!-- Группа Масштаб -->
+                <Fluent:RibbonGroupBox Header="Масштаб">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Fluent:Button x:Name="BtnZoomIn" Header="Увеличить" SizeDefinition="Large" IsEnabled="False" 
+                                       Click="ToolZoomIn_Click" ToolTip="Масштаб + (+)">
+                            <Fluent:Button.Icon>
+                                <TextBlock Text="🔍+" FontSize="16"/>
+                            </Fluent:Button.Icon>
+                        </Fluent:Button>
+                        <Fluent:Button x:Name="BtnZoomOut" Header="Уменьшить" SizeDefinition="Large" IsEnabled="False" 
+                                       Click="ToolZoomOut_Click" ToolTip="Масштаб − (−)">
+                            <Fluent:Button.Icon>
+                                <TextBlock Text="🔍−" FontSize="16"/>
+                            </Fluent:Button.Icon>
+                        </Fluent:Button>
+                    </StackPanel>
+                </Fluent:RibbonGroupBox>
+
+                <!-- Группа Холст -->
+                <Fluent:RibbonGroupBox Header="Холст">
+                    <Fluent:Button x:Name="BtnResize" Header="Изменить размер" SizeDefinition="Large"
+                                   IsEnabled="False" Click="ResizeCanvas_Click"
+                                   ToolTip="Изменить размер холста"/>
+                </Fluent:RibbonGroupBox>
+            </Fluent:RibbonTabItem>
+
+        </Fluent:Ribbon>
+
+        <!-- Строка состояния -->
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusPosition" Text="Позиция: —"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock x:Name="StatusSize" Text="Размер: —"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock x:Name="StatusTool" Text="Инструмент: —"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock x:Name="StatusZoom" Text="Масштаб: 100%"/>
+            </StatusBarItem>
+        </StatusBar>
+
+        <avalonDock:DockingManager x:Name="DockManager"
+                                    DocumentClosing="DockManager_DocumentClosing"
+                                    ActiveContentChanged="DockManager_ActiveContentChanged">
+            <avalonDock:LayoutRoot>
+                <avalonDock:LayoutPanel Orientation="Horizontal">
+                    <avalonDock:LayoutDocumentPaneGroup>
+                        <avalonDock:LayoutDocumentPane x:Name="DocumentPane"/>
+                    </avalonDock:LayoutDocumentPaneGroup>
+                </avalonDock:LayoutPanel>
+            </avalonDock:LayoutRoot>
+        </avalonDock:DockingManager>
+    </DockPanel>
+</Fluent:RibbonWindow>
