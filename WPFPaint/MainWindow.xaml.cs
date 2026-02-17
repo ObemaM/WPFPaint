@@ -422,16 +422,27 @@ namespace WPFPaint
             UpdateUIState();
         }
 
+        // Получает все DrawingCanvas из всех документов
+        private System.Collections.Generic.IEnumerable<DrawingCanvas> GetAllCanvases()
+        {
+            if (DockManager?.Layout == null) return System.Linq.Enumerable.Empty<DrawingCanvas>();
+            
+            return DockManager.Layout.Descendents()
+                .OfType<LayoutDocument>()
+                .Select(d => d.Content as DrawingCanvas)
+                .Where(c => c != null);
+        }
+
         // Установка инструментов
         private void SetTool(ITool tool)
         {
             // Смена текущего инструмента
             _currentTool = tool;
-            var canvas = ActiveCanvas;
-
-            // Безопасная проверка на наличие открытого документа
-            if (canvas != null)
+            
+            // Применяем ко всем открытым документам
+            foreach (var canvas in GetAllCanvases())
                 canvas.CurrentTool = tool;
+            
             UpdateStatusTool();
         }
 
@@ -487,8 +498,8 @@ namespace WPFPaint
                     StrokeColorBorder.Background = new SolidColorBrush(_strokeColor);
 
                     // Применяем к текущему холсту, если он есть
-                    if (ActiveCanvas != null)
-                        ActiveCanvas.StrokeColor = _strokeColor;
+                foreach (var canvas in GetAllCanvases())
+                    canvas.StrokeColor = _strokeColor;
                 }
             }
             catch (Exception ex) // Обработка ошибок при выборе цвета
@@ -517,8 +528,8 @@ namespace WPFPaint
                     FillColorBorder.Background = new SolidColorBrush(_fillColor);
 
                     // Применяем к текущему холсту, если он есть
-                    if (ActiveCanvas != null)
-                        ActiveCanvas.FillColor = _fillColor;
+                foreach (var canvas in GetAllCanvases())
+                    canvas.FillColor = _fillColor;
                 }
             }
             catch (Exception ex) // Обработка ошибок при выборе цвета
@@ -541,8 +552,8 @@ namespace WPFPaint
                     _strokeThickness = t;
 
                     // Смена толщины на текущем холсте
-                    if (ActiveCanvas != null)
-                        ActiveCanvas.StrokeThickness = t;
+                    foreach (var canvas in GetAllCanvases())
+                        canvas.StrokeThickness = _strokeThickness;
                 }
             }
         }
@@ -552,8 +563,8 @@ namespace WPFPaint
         {
             // Обработка переключателя заливки
             _isFilled = FilledCheckBox.IsChecked == true;
-            if (ActiveCanvas != null)
-                ActiveCanvas.IsFilled = _isFilled;
+            foreach (var canvas in GetAllCanvases())
+                canvas.IsFilled = _isFilled;
         }
 
         // Изменение размера холста
