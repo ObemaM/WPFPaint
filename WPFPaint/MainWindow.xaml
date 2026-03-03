@@ -114,6 +114,27 @@
                 </Fluent:RibbonGroupBox>
             </Fluent:RibbonTabItem>
 
+            <!-- Вкладка Фильтры (плагины) -->
+            <Fluent:RibbonTabItem Header="Фильтры">
+                <!-- Группа с кнопками плагинов (заполняется динамически) -->
+                <Fluent:RibbonGroupBox x:Name="FiltersGroup" Header="Фильтры изображения">
+                    <StackPanel x:Name="FiltersPanel" Orientation="Horizontal"/>
+                </Fluent:RibbonGroupBox>
+
+                <!-- Управление плагинами -->
+                <Fluent:RibbonGroupBox Header="Управление">
+                    <Fluent:Button Header="🔌 Управление плагинами" SizeDefinition="Large"
+                                   Click="ManagePlugins_Click" ToolTip="Просмотр и настройка загруженных плагинов"/>
+                </Fluent:RibbonGroupBox>
+
+                <!-- Динамическая компиляция -->
+                <Fluent:RibbonGroupBox Header="Динамический фильтр">
+                    <Fluent:Button x:Name="BtnDynamicFilter" Header="🧪 Написать фильтр" SizeDefinition="Large"
+                                   Click="DynamicFilter_Click" IsEnabled="False"
+                                   ToolTip="Написать и применить фильтр на C# (динамическая компиляция)"/>
+                </Fluent:RibbonGroupBox>
+            </Fluent:RibbonTabItem>
+
         </Fluent:Ribbon>
 
         <!-- Строка состояния -->

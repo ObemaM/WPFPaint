@@ -1,3 +1,7 @@
 <Solution>
   <Project Path="WPFPaint/WPFPaint.csproj" Id="0cb82a49-925a-478c-8b2f-028fc77d34a7" />
+  <Project Path="PluginInterface/PluginInterface.csproj" Id="a1b2c3d4-e5f6-4789-abcd-111111111111" />
+  <Project Path="SepiaPlugin/SepiaPlugin.csproj" Id="a1b2c3d4-e5f6-4789-abcd-222222222222" />
+  <Project Path="ContrastPlugin/ContrastPlugin.csproj" Id="a1b2c3d4-e5f6-4789-abcd-333333333333" />
+  <Project Path="ShufflePlugin/ShufflePlugin.csproj" Id="a1b2c3d4-e5f6-4789-abcd-444444444444" />
 </Solution>

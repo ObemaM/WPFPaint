@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>ContrastPlugin</RootNamespace>
+    <AssemblyName>ContrastPlugin</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PluginInterface\PluginInterface.csproj" />
+  </ItemGroup>
+
+  <!-- Копирование DLL плагина в папку Plugins после сборки -->
+  <Target Name="CopyPluginToApp" AfterTargets="Build">
+    <PropertyGroup>
+      <PluginsDir>..\WPFPaint\bin\$(Configuration)\net8.0-windows\Plugins\</PluginsDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(PluginsDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginsDir)" />
+  </Target>
+
+</Project>

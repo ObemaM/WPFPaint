@@ -13,6 +13,11 @@
   <ItemGroup>
     <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
     <PackageReference Include="Fluent.Ribbon" Version="11.0.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PluginInterface\PluginInterface.csproj" />
   </ItemGroup>
 
 </Project>

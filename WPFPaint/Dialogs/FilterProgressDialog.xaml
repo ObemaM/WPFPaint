@@ -1,0 +1,18 @@
+<Window x:Class="WPFPaint.Dialogs.FilterProgressDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Применение фильтра" Height="170" Width="400"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        ShowInTaskbar="False" Closing="Window_Closing">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="StatusText" Grid.Row="0" Text="Выполнение фильтра..." FontSize="13" Margin="0,0,0,12"/>
+        <ProgressBar x:Name="ProgressBar" Grid.Row="1" Height="24" Minimum="0" Maximum="100" Value="0" Margin="0,0,0,16"/>
+        <Button x:Name="CancelButton" Grid.Row="2" Content="Отмена" Width="100" Height="30" HorizontalAlignment="Center" Click="Cancel_Click"/>
+    </Grid>
+</Window>

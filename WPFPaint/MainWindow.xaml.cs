@@ -6,9 +6,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Linq;
 using AvalonDock.Layout;
 using WPFPaint.Tools;
+using PluginInterface;
 
 namespace WPFPaint
 {
@@ -44,6 +46,9 @@ namespace WPFPaint
         private bool _isFilled = false;
         private int _newDocCounter = 0;
 
+        // Менеджер плагинов
+        private PluginManager _pluginManager = new PluginManager();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -63,6 +68,9 @@ namespace WPFPaint
 
             // Обновляет текст статусной строки для текущего инструмента
             UpdateStatusTool();
+
+            // Инициализация системы плагинов
+            InitializePlugins();
         }
 
         // Текущий активный документ (получаем из AvalonDock)
@@ -155,6 +163,13 @@ namespace WPFPaint
             BtnZoomIn.IsEnabled = hasDoc;
             BtnZoomOut.IsEnabled = hasDoc;
             BtnResize.IsEnabled = hasDoc;
+            BtnDynamicFilter.IsEnabled = hasDoc;
+
+            // Обновляем кнопки фильтров (созданы динамически)
+            foreach (var btn in FiltersPanel.Children.OfType<Fluent.Button>())
+            {
+                btn.IsEnabled = hasDoc;
+            }
 
             // Если есть открытый документ, то добавляем строку состояния
             if (hasDoc)
@@ -599,6 +614,117 @@ namespace WPFPaint
             var dlg = new Dialogs.AboutDialog();
             dlg.Owner = this;
             dlg.ShowDialog();
+        }
+
+        // ======================== ПЛАГИНЫ ========================
+
+        /// <summary>
+        /// Инициализация подсистемы плагинов.
+        /// </summary>
+        private void InitializePlugins()
+        {
+            try
+            {
+                _pluginManager.Initialize();
+                CreatePluginsMenu();
+                UpdateUIState(); // Обновляем состояние кнопок фильтров
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка инициализации плагинов: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Создание кнопок фильтров в Ribbon для каждого включённого плагина.
+        /// </summary>
+        private void CreatePluginsMenu()
+        {
+            FiltersPanel.Children.Clear();
+
+            foreach (var pluginInfo in _pluginManager.EnabledPlugins)
+            {
+                var btn = new Fluent.Button
+                {
+                    Header = pluginInfo.Name,
+                    SizeDefinition = "Large",
+                    Tag = pluginInfo,
+                    ToolTip = $"{pluginInfo.Name}\nАвтор: {pluginInfo.Author}\nВерсия: {pluginInfo.Version}"
+                };
+                btn.Click += OnPluginClick;
+                FiltersPanel.Children.Add(btn);
+            }
+        }
+
+        /// <summary>
+        /// Обработка клика по кнопке плагина — применение фильтра к активному документу.
+        /// </summary>
+        private void OnPluginClick(object sender, RoutedEventArgs e)
+        {
+            var canvas = ActiveCanvas;
+            if (canvas == null || canvas.Bitmap == null) return;
+
+            var btn = sender as Fluent.Button;
+            var pluginInfo = btn?.Tag as PluginInfo;
+            if (pluginInfo?.Instance == null) return;
+
+            // Показываем окно прогресса с асинхронным выполнением
+            var progressDlg = new Dialogs.FilterProgressDialog(pluginInfo.Instance, canvas.Bitmap);
+            progressDlg.Owner = this;
+
+            if (progressDlg.ShowDialog() == true && progressDlg.ResultPixels != null)
+            {
+                // Записываем обработанные пиксели обратно в WriteableBitmap
+                int w = canvas.Bitmap.PixelWidth;
+                int h = canvas.Bitmap.PixelHeight;
+                canvas.Bitmap.WritePixels(new Int32Rect(0, 0, w, h), progressDlg.ResultPixels, w * 4, 0);
+                canvas.InvalidateBitmap();
+                canvas.IsModified = true;
+            }
+        }
+
+        /// <summary>
+        /// Открытие диалога управления плагинами.
+        /// </summary>
+        private void ManagePlugins_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Dialogs.PluginManagerDialog(_pluginManager.AllPlugins);
+            dlg.Owner = this;
+
+            if (dlg.ShowDialog() == true && dlg.HasChanges)
+            {
+                _pluginManager.Reload();
+                CreatePluginsMenu();
+            }
+        }
+
+        /// <summary>
+        /// Открытие диалога динамической компиляции C#-кода.
+        /// </summary>
+        private void DynamicFilter_Click(object sender, RoutedEventArgs e)
+        {
+            var canvas = ActiveCanvas;
+            if (canvas == null || canvas.Bitmap == null) return;
+
+            int w = canvas.Bitmap.PixelWidth;
+            int h = canvas.Bitmap.PixelHeight;
+            byte[] pixels = new byte[w * h * 4];
+            canvas.Bitmap.CopyPixels(pixels, w * 4, 0);
+
+            var dlg = new Dialogs.DynamicCodeDialog
+            {
+                Owner = this,
+                SourcePixels = pixels,
+                ImageWidth = w,
+                ImageHeight = h
+            };
+
+            if (dlg.ShowDialog() == true && dlg.ResultPixels != null)
+            {
+                canvas.Bitmap.WritePixels(new Int32Rect(0, 0, w, h), dlg.ResultPixels, w * 4, 0);
+                canvas.InvalidateBitmap();
+                canvas.IsModified = true;
+            }
         }
 
         // Обновляет позицию курсора в статусной строке
